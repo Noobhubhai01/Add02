@@ -240,12 +240,12 @@ def send_stats(message):
         bot.send_message(message.chat.id, "No promotions found.", reply_markup=admin_menu_keyboard())
         return
 
-    for promo in promos:
-        text = f"📢 Promo ID: {promo[0]}
-Title: {promo[1]}
-Total Joins: {promo[2]}
-Joined Users:
-"
+    text = (
+    f"📢 Promo ID: {promo[0]}\n"
+    f"Title: {promo[1]}\n"
+    f"Total Joins: {promo[2]}\n"
+    "Joined Users:\n"
+    )
         cursor.execute("""
             SELECT users.username, users.first_name, users.last_name, user_promos.join_time
             FROM user_promos
