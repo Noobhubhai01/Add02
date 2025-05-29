@@ -125,7 +125,7 @@ def start_handler(message):
     if param and param.startswith("promo"):
         try:
             promo_id = int(param[5:])
-        except:
+        except ValueError:
             promo_id = None
 
     if promo_id:
@@ -194,10 +194,10 @@ def get_promo_title(message):
     title = message.text.strip()
     if not title:
         return bot.reply_to(message, "Title can't be empty. Send the promo title:")
-    message.chat_data = {}
-    message.chat_data['promo_title'] = title
+    chat_data = {}
+    chat_data['promo_title'] = title
     msg = bot.send_message(message.chat.id, "Send the Telegram channel/group link (e.g. https://t.me/yourchannel):")
-    bot.register_next_step_handler(msg, get_promo_link, message.chat_data)
+    bot.register_next_step_handler(msg, get_promo_link, chat_data)
 
 def get_promo_link(message, chat_data):
     link = message.text.strip()
@@ -240,12 +240,8 @@ def send_stats(message):
         bot.send_message(message.chat.id, "No promotions found.", reply_markup=admin_menu_keyboard())
         return
 
-    text = (
-    f"📢 Promo ID: {promo[0]}\n"
-    f"Title: {promo[1]}\n"
-    f"Total Joins: {promo[2]}\n"
-    "Joined Users:\n"
-    )
+    for promo in promos:
+        text = f"📢 Promo ID: {promo[0]}\nTitle: {promo[1]}\nTotal Joins: {promo[2]}\nJoined Users:\n"
         cursor.execute("""
             SELECT users.username, users.first_name, users.last_name, user_promos.join_time
             FROM user_promos
@@ -257,11 +253,9 @@ def send_stats(message):
             for user in joins:
                 name = f"{user[1]} {user[2]}" if user[1] or user[2] else "N/A"
                 username = f"@{user[0]}" if user[0] else "N/A"
-                text += f" - {name} ({username}) at {user[3]}
-"
+                text += f" - {name} ({username}) at {user[3]}\n"
         else:
-            text += "No users joined yet.
-"
+            text += "No users joined yet.\n"
 
         bot.send_message(message.chat.id, text[:4096])  # Avoid Telegram message limit
 
